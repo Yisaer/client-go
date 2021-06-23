@@ -521,13 +521,11 @@ func (s *RegionRequestSender) SendReqCtx(
 			rpcCtx.tryTimes = tryTimes
 		}
 
-		if len(req.TxnScope) > 0 && req.TxnScope != "global" {
-			logutil.BgLogger().Info("getRPCContext",
-				zap.String("txnScope", req.TxnScope),
-				zap.Bool("isStaleness", req.StaleRead),
-				zap.Uint64("storeID", rpcCtx.Store.storeID),
-				zap.Int("opts lens", len(opts)))
-		}
+		logutil.BgLogger().Info("getRPCContext",
+			zap.String("txnScope", req.TxnScope),
+			zap.Bool("isStaleness", req.StaleRead),
+			zap.Uint64("storeID", rpcCtx.Store.storeID),
+			zap.Int("opts lens", len(opts)))
 
 		if _, err := util.EvalFailpoint("invalidCacheAndRetry"); err == nil {
 			// cooperate with tikvclient/setGcResolveMaxBackoff
