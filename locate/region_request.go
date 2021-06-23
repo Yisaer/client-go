@@ -513,7 +513,6 @@ func (s *RegionRequestSender) SendReqCtx(
 		if (tryTimes > 0) && (tryTimes%100 == 0) {
 			logutil.Logger(bo.GetCtx()).Warn("retry", zap.Uint64("region", regionID.GetID()), zap.Int("times", tryTimes))
 		}
-
 		rpcCtx, err = s.getRPCContext(bo, req, regionID, et, opts...)
 		if err != nil {
 			return nil, nil, err
@@ -521,6 +520,12 @@ func (s *RegionRequestSender) SendReqCtx(
 		if rpcCtx != nil {
 			rpcCtx.tryTimes = tryTimes
 		}
+
+		logutil.BgLogger().Info("getRPCContext",
+			zap.String("txnScope", req.TxnScope),
+			zap.Bool("isStaleness", req.StaleRead),
+			zap.Uint64("storeID", rpcCtx.Store.storeID),
+			zap.Int("opts lens", len(opts)))
 
 		if _, err := util.EvalFailpoint("invalidCacheAndRetry"); err == nil {
 			// cooperate with tikvclient/setGcResolveMaxBackoff
