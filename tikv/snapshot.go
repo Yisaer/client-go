@@ -36,6 +36,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pingcap/log"
 	"math"
 	"sync"
 	"sync/atomic"
@@ -522,6 +523,7 @@ func (s *KVSnapshot) get(ctx context.Context, bo *Backoffer, k []byte) ([]byte, 
 	txnScope := s.mu.txnScope
 	s.mu.RUnlock()
 	req.TxnScope = txnScope
+	log.Info("reqTxnScope", zap.String("txnscope", req.TxnScope), zap.Bool("isStaleness", isStaleness))
 	var ops []locate.StoreSelectorOption
 	if isStaleness {
 		req.EnableStaleRead()
