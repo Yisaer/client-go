@@ -903,6 +903,7 @@ func (s *RegionRequestSender) onRegionError(bo *retry.Backoffer, ctx *RPCContext
 	// if txnScope is global, we will only retry the leader by using the WithLeaderOnly option,
 	// if txnScope is local, we will retry both other peers and the leader by the incresing seed.
 	if ctx.tryTimes < 1 && req != nil && req.TxnScope == oracle.GlobalTxnScope && req.GetStaleRead() {
+		metrics.RequestFallbackLeader.WithLabelValues(req.TxnScope).Inc()
 		*opts = append(*opts, WithLeaderOnly())
 	}
 	seed := req.GetReplicaReadSeed()

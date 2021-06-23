@@ -192,6 +192,7 @@ func (r *regionStore) follower(seed uint32, op *storeSelectorOp) AccessIndex {
 // return next leader or follower store's index
 func (r *regionStore) kvPeer(seed uint32, op *storeSelectorOp) AccessIndex {
 	if op.leaderOnly {
+		metrics.TiKVSelectFallbackLeader.WithLabelValues("leader-only").Inc()
 		return r.workTiKVIdx
 	}
 	candidates := make([]AccessIndex, 0, r.accessStoreNum(tiKVOnly))
@@ -205,6 +206,7 @@ func (r *regionStore) kvPeer(seed uint32, op *storeSelectorOp) AccessIndex {
 	}
 	// If there is no candidates, send to current workTiKVIdx which generally is the leader.
 	if len(candidates) == 0 {
+		metrics.TiKVSelectFallbackLeader.WithLabelValues("fall-back-leader").Inc()
 		return r.workTiKVIdx
 	}
 	return candidates[seed%uint32(len(candidates))]

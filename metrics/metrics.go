@@ -85,6 +85,8 @@ var (
 	TiKVTxnCommitBackoffSeconds            prometheus.Histogram
 	TiKVTxnCommitBackoffCount              prometheus.Histogram
 	TiKVSmallReadDuration                  prometheus.Histogram
+	TiKVSelectFallbackLeader               *prometheus.CounterVec
+	RequestFallbackLeader                  *prometheus.CounterVec
 )
 
 // Label constants.
@@ -498,7 +500,20 @@ func initMetrics(namespace, subsystem string) {
 			Help:      "Read time of TiKV small read.",
 			Buckets:   prometheus.ExponentialBuckets(0.0005, 2, 28), // 0.5ms ~ 74h
 		})
-
+	TiKVSelectFallbackLeader = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "store_select_fail_back_leader",
+			Help:      "Counter of the reason why the replica selector cannot yield a potential leader.",
+		}, []string{LblType})
+	RequestFallbackLeader = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "request_fall_back_leader",
+			Help:      "Counter of the reason why the replica selector cannot yield a potential leader.",
+		}, []string{LblType})
 	initShortcuts()
 }
 
@@ -560,6 +575,8 @@ func RegisterMetrics() {
 	prometheus.MustRegister(TiKVTxnCommitBackoffSeconds)
 	prometheus.MustRegister(TiKVTxnCommitBackoffCount)
 	prometheus.MustRegister(TiKVSmallReadDuration)
+	prometheus.MustRegister(TiKVSelectFallbackLeader)
+	prometheus.MustRegister(RequestFallbackLeader)
 }
 
 // readCounter reads the value of a prometheus.Counter.
