@@ -521,7 +521,7 @@ func (s *RegionRequestSender) SendReqCtx(
 			rpcCtx.tryTimes = tryTimes
 		}
 
-		if len(req.TxnScope) > 0 {
+		if len(req.TxnScope) > 0 && req.TxnScope != "global" {
 			logutil.BgLogger().Info("getRPCContext",
 				zap.String("txnScope", req.TxnScope),
 				zap.Bool("isStaleness", req.StaleRead),
